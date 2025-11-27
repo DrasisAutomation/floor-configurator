@@ -60,27 +60,45 @@
                 <div class="tool-section">
                     <h3>Furniture</h3>
                     <div class="furniture-item" data-type="door">
-                        <div class="furniture-icon">D</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/2.png" alt="Door" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">D</span>
+                        </div>
                         <span>Door</span>
                     </div>
                     <div class="furniture-item" data-type="window">
-                        <div class="furniture-icon">W</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/1.png" alt="Window" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">W</span>
+                        </div>
                         <span>Window</span>
                     </div>
                     <div class="furniture-item" data-type="sofa">
-                        <div class="furniture-icon">S</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/3.png" alt="Sofa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">S</span>
+                        </div>
                         <span>Sofa</span>
                     </div>
                     <div class="furniture-item" data-type="table">
-                        <div class="furniture-icon">T</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/4.png" alt="Table" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">T</span>
+                        </div>
                         <span>Dining Table</span>
                     </div>
                     <div class="furniture-item" data-type="bed">
-                        <div class="furniture-icon">B</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/5.png" alt="Bed" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">B</span>
+                        </div>
                         <span>Bed</span>
                     </div>
                     <div class="furniture-item" data-type="tv">
-                        <div class="furniture-icon">TV</div>
+                        <div class="furniture-icon">
+                            <img src="images/furniture/6.png" alt="TV" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span style="display:none;">TV</span>
+                        </div>
                         <span>TV</span>
                     </div>
                 </div>
@@ -93,7 +111,6 @@
                     </div>
                 </div>
 
-                
                 <div class="instructions">
                     <h4>Instructions:</h4>
                     <ul>
@@ -167,6 +184,12 @@
                             <label class="property-label">Rotation</label>
                             <input type="range" class="property-slider" id="furniture-rotation" min="0" max="360" value="0">
                             <span id="rotation-value">0°</span>
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Quick Rotate</label>
+                            <button class="rotate-btn" id="rotate-90-btn">
+                                Rotate +90°
+                            </button>
                         </div>
                         <button class="delete-btn" id="delete-furniture">Delete Furniture</button>
                     </div>

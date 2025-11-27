@@ -27,6 +27,19 @@ const appState = {
     nextJointId: 1
 };
 
+// Furniture images configuration
+const furnitureImages = {
+    door: 'images/furniture/2.png',
+    window: 'images/furniture/1.png',
+    sofa: 'images/furniture/3.png',
+    table: 'images/furniture/4.png',
+    bed: 'images/furniture/5.png',
+    tv: 'images/furniture/6.png'
+};
+
+// Preloaded images
+const loadedImages = {};
+
 // DOM elements
 const canvas = document.getElementById('floor-plan-canvas');
 const ctx = canvas.getContext('2d');
@@ -65,6 +78,7 @@ const furnitureWidth = document.getElementById('furniture-width');
 const furnitureHeight = document.getElementById('furniture-height');
 const furnitureRotation = document.getElementById('furniture-rotation');
 const rotationValue = document.getElementById('rotation-value');
+const rotate90Btn = document.getElementById('rotate-90-btn');
 
 // Delete buttons
 const deleteWallBtn = document.getElementById('delete-wall');
@@ -85,10 +99,28 @@ const resetViewBtn = document.getElementById('reset-view');
 // Furniture items
 const furnitureItems = document.querySelectorAll('.furniture-item');
 
+// Load furniture images
+function loadFurnitureImages() {
+    for (const [type, src] of Object.entries(furnitureImages)) {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            console.log(`Loaded image: ${type}`);
+        };
+        img.onerror = () => {
+            console.warn(`Failed to load image: ${src}`);
+        };
+        loadedImages[type] = img;
+    }
+}
+
 // Initialize canvas
 function initCanvas() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+    
+    // Load furniture images
+    loadFurnitureImages();
     
     // Add event listeners
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -138,6 +170,9 @@ function initCanvas() {
     furnitureHeight.addEventListener('change', updateFurnitureProperties);
     furnitureRotation.addEventListener('input', updateFurnitureRotation);
     
+    // Add rotation button event
+    rotate90Btn.addEventListener('click', rotateFurniture90);
+    
     // Add delete button events
     deleteWallBtn.addEventListener('click', deleteSelectedWall);
     deleteFurnitureBtn.addEventListener('click', deleteSelectedFurniture);
@@ -165,6 +200,17 @@ function initCanvas() {
     
     // Start animation loop
     requestAnimationFrame(render);
+}
+
+// Rotate furniture by 90 degrees
+function rotateFurniture90() {
+    if (appState.selectedType === 'furniture' && appState.selectedItem) {
+        const furniture = appState.selectedItem;
+        furniture.rotation = (furniture.rotation + 90) % 360;
+        updateFurniturePropertiesPanel();
+        saveToHistory();
+        operationStatus.textContent = `Rotated ${furniture.type} to ${furniture.rotation}°`;
+    }
 }
 
 // Resize canvas to fit container
@@ -725,12 +771,12 @@ function getResizeHandleAtPoint(x, y, furniture) {
 
 function getDefaultFurnitureSize(type) {
     const sizes = {
-        door: { width: 80, height: 10 },
-        window: { width: 100, height: 10 },
-        sofa: { width: 160, height: 80 },
-        table: { width: 120, height: 80 },
-        bed: { width: 150, height: 200 },
-        tv: { width: 60, height: 40 }
+        door: { width: 80, height: 80 },      // Square
+        window: { width: 100, height: 100 },  // Square
+        sofa: { width: 120, height: 120 },    // Square
+        table: { width: 100, height: 100 },   // Square
+        bed: { width: 120, height: 120 },     // Square
+        tv: { width: 80, height: 80 }         // Square
     };
     return sizes[type] || { width: 100, height: 100 };
 }
@@ -1119,7 +1165,7 @@ function drawGridOnCanvas(ctx, width, height, offsetX, offsetY) {
     ctx.lineWidth = 1;
     
     // Vertical lines
-    for (let x = offsetX % gridSize; x < width; x += gridSize) {
+    for (let x = 0; x < width; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
@@ -1127,12 +1173,14 @@ function drawGridOnCanvas(ctx, width, height, offsetX, offsetY) {
     }
     
     // Horizontal lines
-    for (let y = offsetY % gridSize; y < height; y += gridSize) {
+    for (let y = 0; y < height; y += gridSize) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
         ctx.stroke();
     }
+    
+    // REMOVED: Darker major grid lines for export
 }
 
 function drawWallOnCanvas(ctx, wall, offsetX, offsetY) {
@@ -1151,30 +1199,61 @@ function drawFurnitureOnCanvas(ctx, furniture, offsetX, offsetY) {
     ctx.translate(furniture.x - offsetX, furniture.y - offsetY);
     ctx.rotate(furniture.rotation * Math.PI / 180);
     
-    // Different colors for different furniture types
-    const colors = {
-        door: '#8B4513',
-        window: '#87CEEB',
-        sofa: '#9b59b6',
-        table: '#d35400',
-        bed: '#3498db',
-        tv: '#2c3e50'
-    };
+    const img = loadedImages[furniture.type];
     
-    ctx.fillStyle = colors[furniture.type] || '#95a5a6';
-    ctx.fillRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
-    
-    // Draw outline
-    ctx.strokeStyle = '#2c3e50';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
-    
-    // Draw label
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(furniture.type, 0, 0);
+    if (img && img.complete) {
+        // Calculate aspect ratio and draw image centered in square
+        const imgAspectRatio = img.width / img.height;
+        const containerAspectRatio = furniture.width / furniture.height;
+        
+        let renderWidth, renderHeight, offsetXImg, offsetYImg;
+        
+        if (imgAspectRatio > containerAspectRatio) {
+            // Image is wider than container
+            renderWidth = furniture.width;
+            renderHeight = furniture.width / imgAspectRatio;
+            offsetXImg = 0;
+            offsetYImg = (furniture.height - renderHeight) / 2;
+        } else {
+            // Image is taller than container
+            renderHeight = furniture.height;
+            renderWidth = furniture.height * imgAspectRatio;
+            offsetXImg = (furniture.width - renderWidth) / 2;
+            offsetYImg = 0;
+        }
+        
+        // Draw image centered in the square
+        ctx.drawImage(
+            img, 
+            -furniture.width/2 + offsetXImg, 
+            -furniture.height/2 + offsetYImg, 
+            renderWidth, 
+            renderHeight
+        );
+    } else {
+        // Fallback to colored rectangle
+        const colors = {
+            door: '#8B4513',
+            window: '#87CEEB',
+            sofa: '#9b59b6',
+            table: '#d35400',
+            bed: '#3498db',
+            tv: '#2c3e50'
+        };
+        
+        ctx.fillStyle = colors[furniture.type] || '#95a5a6';
+        ctx.fillRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
+        
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(furniture.type, 0, 0);
+    }
     
     ctx.restore();
 }
@@ -1315,27 +1394,37 @@ function render() {
 
 function drawGrid() {
     const gridSize = 20;
-    const offsetX = 0;
-    const offsetY = 0;
+    
+    // Calculate visible area in world coordinates
+    const topLeft = screenToWorld(0, 0);
+    const bottomRight = screenToWorld(canvas.width, canvas.height);
     
     ctx.strokeStyle = '#f0f0f0';
     ctx.lineWidth = 1;
     
+    // Calculate starting points for grid lines
+    const startX = Math.floor(topLeft.x / gridSize) * gridSize;
+    const startY = Math.floor(topLeft.y / gridSize) * gridSize;
+    const endX = Math.ceil(bottomRight.x / gridSize) * gridSize;
+    const endY = Math.ceil(bottomRight.y / gridSize) * gridSize;
+    
     // Vertical lines
-    for (let x = offsetX; x < canvas.width / appState.viewTransform.scale; x += gridSize) {
+    for (let x = startX; x <= endX; x += gridSize) {
         ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height / appState.viewTransform.scale);
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
         ctx.stroke();
     }
     
     // Horizontal lines
-    for (let y = offsetY; y < canvas.height / appState.viewTransform.scale; y += gridSize) {
+    for (let y = startY; y <= endY; y += gridSize) {
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width / appState.viewTransform.scale, y);
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
         ctx.stroke();
     }
+    
+    // REMOVED: Darker major grid lines
 }
 
 function drawWall(wall, isTemporary = false) {
@@ -1378,30 +1467,63 @@ function drawFurniture(furniture) {
     ctx.translate(furniture.x, furniture.y);
     ctx.rotate(furniture.rotation * Math.PI / 180);
     
-    // Different colors for different furniture types
-    const colors = {
-        door: '#8B4513',
-        window: '#87CEEB',
-        sofa: '#9b59b6',
-        table: '#d35400',
-        bed: '#3498db',
-        tv: '#2c3e50'
-    };
+    const img = loadedImages[furniture.type];
     
-    ctx.fillStyle = colors[furniture.type] || '#95a5a6';
-    ctx.fillRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
-    
-    // Draw outline
-    ctx.strokeStyle = '#2c3e50';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
-    
-    // Draw label
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(furniture.type, 0, 0);
+    if (img && img.complete) {
+        // Calculate aspect ratio and draw image centered in square
+        const imgAspectRatio = img.width / img.height;
+        const containerAspectRatio = furniture.width / furniture.height;
+        
+        let renderWidth, renderHeight, offsetX, offsetY;
+        
+        if (imgAspectRatio > containerAspectRatio) {
+            // Image is wider than container
+            renderWidth = furniture.width;
+            renderHeight = furniture.width / imgAspectRatio;
+            offsetX = 0;
+            offsetY = (furniture.height - renderHeight) / 2;
+        } else {
+            // Image is taller than container
+            renderHeight = furniture.height;
+            renderWidth = furniture.height * imgAspectRatio;
+            offsetX = (furniture.width - renderWidth) / 2;
+            offsetY = 0;
+        }
+        
+        // Draw image centered in the square
+        ctx.drawImage(
+            img, 
+            -furniture.width/2 + offsetX, 
+            -furniture.height/2 + offsetY, 
+            renderWidth, 
+            renderHeight
+        );
+    } else {
+        // Fallback to colored rectangle if image not loaded
+        const colors = {
+            door: '#8B4513',
+            window: '#87CEEB',
+            sofa: '#9b59b6',
+            table: '#d35400',
+            bed: '#3498db',
+            tv: '#2c3e50'
+        };
+        
+        ctx.fillStyle = colors[furniture.type] || '#95a5a6';
+        ctx.fillRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
+        
+        // Draw outline
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-furniture.width/2, -furniture.height/2, furniture.width, furniture.height);
+        
+        // Draw label
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(furniture.type, 0, 0);
+    }
     
     ctx.restore();
 }
@@ -1528,4 +1650,3 @@ function drawAngleGuides(wall) {
 
 // Initialize the application
 initCanvas();
-
