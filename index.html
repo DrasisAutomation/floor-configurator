@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2D Home Floor Planner</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <div id="device-warning">
+        <div class="warning-box">
+            <div class="warning-icon">⚠️</div>
+            <h2>Please Use a Laptop or Desktop</h2>
+            <p>This 2D Floor Planner works only on larger screens.</p>
+        </div>
+    </div>
+
     <div class="app-container">
         <div class="top-bar">
             <div class="app-title">
@@ -46,7 +56,7 @@
                     <button class="tool-btn" id="measure-tool">
                         <i>📐</i> Measure
                     </button>
-                    
+
                     <div class="property-group">
                         <label class="property-label" style="color: white;">Wall Thickness</label>
                         <select id="wall-thickness" class="property-input">
@@ -61,42 +71,48 @@
                     <h3>Furniture</h3>
                     <div class="furniture-item" data-type="door">
                         <div class="furniture-icon">
-                            <img src="images/furniture/2.png" alt="Door" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/2.png" alt="Door"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">D</span>
                         </div>
                         <span>Door</span>
                     </div>
                     <div class="furniture-item" data-type="window">
                         <div class="furniture-icon">
-                            <img src="images/furniture/1.png" alt="Window" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/1.png" alt="Window"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">W</span>
                         </div>
                         <span>Window</span>
                     </div>
                     <div class="furniture-item" data-type="sofa">
                         <div class="furniture-icon">
-                            <img src="images/furniture/3.png" alt="Sofa" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/3.png" alt="Sofa"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">S</span>
                         </div>
                         <span>Sofa</span>
                     </div>
                     <div class="furniture-item" data-type="table">
                         <div class="furniture-icon">
-                            <img src="images/furniture/4.png" alt="Table" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/4.png" alt="Table"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">T</span>
                         </div>
                         <span>Dining Table</span>
                     </div>
                     <div class="furniture-item" data-type="bed">
                         <div class="furniture-icon">
-                            <img src="images/furniture/5.png" alt="Bed" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/5.png" alt="Bed"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">B</span>
                         </div>
                         <span>Bed</span>
                     </div>
                     <div class="furniture-item" data-type="tv">
                         <div class="furniture-icon">
-                            <img src="images/furniture/6.png" alt="TV" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <img src="images/furniture/6.png" alt="TV"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             <span style="display:none;">TV</span>
                         </div>
                         <span>TV</span>
@@ -182,7 +198,8 @@
                         </div>
                         <div class="property-group">
                             <label class="property-label">Rotation</label>
-                            <input type="range" class="property-slider" id="furniture-rotation" min="0" max="360" value="0">
+                            <input type="range" class="property-slider" id="furniture-rotation" min="0" max="360"
+                                value="0">
                             <span id="rotation-value">0°</span>
                         </div>
                         <div class="property-group">
@@ -205,4 +222,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
